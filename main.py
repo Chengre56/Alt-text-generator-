@@ -1,3 +1,4 @@
+import streamlit as st
 from google import genai
 from PIL import Image
 
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     try:
         alt_text = generate_alt_text(IMAGE_FILE, YOUR_API_KEY)
         print("\n--- Generated Alt Text ---")
-        print(alt_text)
+        st.write(alt_text)
     except Exception as e:
-        print(f"Error generating alt text: {e}")
+        st.error(f"Error generating alt text: {e}")
 
