@@ -35,7 +35,7 @@ if __name__ == "__main__":
     YOUR_API_KEY = "your-gemini-api-key-here"
     
     # Path to any product photo on your computer
-    IMAGE_FILE = "python/images.jpg" 
+    IMAGE_FILE = "images.jpg" 
     
     try:
         alt_text = generate_alt_text(IMAGE_FILE, YOUR_API_KEY)
