@@ -4,50 +4,73 @@ from PIL import Image
 from google import genai
 import time
 
-st.title("Bulk Alt-Text Generator")
+# Page configuration
+st.set_page_config(page_title="Bulk Alt-Text Generator", page_icon="🖼️", layout="wide")
+
+st.title("🖼️ Bulk Alt-Text Generator for E-Commerce")
+st.write("Upload product images and generate SEO-friendly alt text automatically.")
+
+# ----------------- SIDEBAR AFFILIATE PROMOTION -----------------
+st.sidebar.title("Recommended Tools")
+st.sidebar.info("💡 **Building an Online Store?**\nGet a fast, SEO-ready store built for online sales.")
+
+# Replace this URL with your actual Impact.com/Shopify affiliate link when ready
+shopify_url = "https://shopify.pxf.io/YOUR_AFFILIATE_ID" 
+
+st.sidebar.link_button("🚀 Start Shopify for $1/month", shopify_url)
+# ---------------------------------------------------------------
 
 # Initialize Gemini Client using secrets
-client = genai.Client(api_key=st.secrets["gemini_api_key"])
+try:
+    client = genai.Client(api_key=st.secrets["gemini_api_key"])
+except Exception as e:
+    st.error("API Key missing or invalid. Please check your Streamlit secrets.")
 
-# 1. Multi-file uploader
+# 1. Multi-file uploader (Capped at 10 images)
 uploaded_files = st.file_uploader(
-    "Upload product images", 
+    "Upload product images (up to 10 at once)", 
     type=["jpg", "jpeg", "png"], 
     accept_multiple_files=True
 )
 
-# 2. Process images with rate-limiting delay
+# 2. Process images
 if uploaded_files:
-    st.write(f"**Total images uploaded:** {len(uploaded_files)}")
-    
-    if st.button("Generate Alt-Text for All"):
-        results = []
-        progress_bar = st.progress(0)
+    if len(uploaded_files) > 10:
+        st.error("Free limit reached! Please upload up to 10 images per batch.")
+    else:
+        st.write(f"**Total images uploaded:** {len(uploaded_files)}")
         
-        for index, file in enumerate(uploaded_files):
-            img = Image.open(file)
+        if st.button("Generate Alt-Text for All"):
+            results = []
+            progress_bar = st.progress(0)
             
-            # Request alt-text generation
-            response = client.models.generate_content(
-                model="gemini-3.6-flash",
-                contents=[img, "Write a concise, SEO-friendly alt text for this product image."]
-            )
+            for index, file in enumerate(uploaded_files):
+                img = Image.open(file)
+                
+                # Graceful API call with rate limit exception handling
+                try:
+                    response = client.models.generate_content(
+                        model="gemini-1.5-flash",
+                        contents=[img, "Write a concise, SEO-friendly alt text for this product image."]
+                    )
+                    alt_text = response.text.strip()
+                except Exception as err:
+                    if "429" in str(err) or "EXHAUSTED" in str(err):
+                        alt_text = "Error: Daily API quota reached. Please try again later."
+                    else:
+                        alt_text = f"Error generating text: {str(err)}"
+
+                results.append({
+                    "File Name": file.name,
+                    "Generated Alt-Text": alt_text
+                })
+                
+                # Update progress bar
+                progress_bar.progress((index + 1) / len(uploaded_files))
+                time.sleep(1)  # Brief pause between calls to avoid hitting rate limits too quickly
             
-            alt_text = response.text.strip()
-            
-            results.append({
-                "File Name": file.name,
-                "Generated Alt-Text": alt_text
-            })
-            
-            # Update progress bar
-            progress_bar.progress((index + 1) / len(uploaded_files))
-            
-            # 1-second delay between API calls to prevent 429 rate limit errors
-            time.sleep(1)
-        
-        st.success("Done!")
-        st.session_state["results_df"] = pd.DataFrame(results)
+            st.success("Processing Complete!")
+            st.session_state["results_df"] = pd.DataFrame(results)
 
 # 3. Display and Download CSV
 if "results_df" in st.session_state:
