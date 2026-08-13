@@ -23,7 +23,7 @@ def generate_alt_text(image_path: str, api_key: str) -> str:
     
     # 4. Generate content using the vision model
     response = client.models.generate_content(
-        model='gemini-3.6-flash',
+        model='gemini-1.5-flash',
         contents=[image, prompt]
     )
     
