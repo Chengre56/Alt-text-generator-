@@ -7,9 +7,11 @@ import time
 # Page configuration
 st.set_page_config(page_title="Bulk Alt-Text Generator", page_icon="🖼️", layout="wide")
 
-# --- IMPACT WEBSITE VERIFICATION ---
-st.write("Impact-Site-Verification: fe779ce7-c525-4db0-87d4-bc40ff9351d6")
-# -----------------------------------
+# --- IMPACT META TAG VERIFICATION ---
+st.html("""
+    <meta name='impact-site-verification' value='26ad408d-64d8-4835-8cb8-1c89c7a72f70'>
+""")
+# ------------------------------------
 
 st.title("🖼️ Bulk Alt-Text Generator for E-Commerce")
 st.write("Upload product images and generate SEO-friendly alt text automatically.")
