@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 from PIL import Image
 from google import genai
@@ -7,11 +8,19 @@ import time
 # Page configuration
 st.set_page_config(page_title="Bulk Alt-Text Generator", page_icon="🖼️", layout="wide")
 
-# --- IMPACT META TAG VERIFICATION ---
-st.html("""
-    <meta name='impact-site-verification' value='26ad408d-64d8-4835-8cb8-1c89c7a72f70'>
-""")
-# ------------------------------------
+# --- IMPACT META TAG VERIFICATION (INJECTED) ---
+components.html("""
+    <script>
+        var meta = document.createElement('meta');
+        meta.name = 'impact-site-verification';
+        meta.value = '26ad408d-64d8-4835-8cb8-1c89c7a72f70';
+        window.parent.document.getElementsByTagName('head')[0].appendChild(meta);
+    </script>
+""", height=0)
+
+# Visible Text Verification (as backup for crawlers reading rendered text)
+st.caption("Impact-Site-Verification: 26ad408d-64d8-4835-8cb8-1c89c7a72f70")
+# -----------------------------------------------
 
 st.title("🖼️ Bulk Alt-Text Generator for E-Commerce")
 st.write("Upload product images and generate SEO-friendly alt text automatically.")
@@ -20,7 +29,6 @@ st.write("Upload product images and generate SEO-friendly alt text automatically
 st.sidebar.title("Recommended Tools")
 st.sidebar.info("💡 **Building an Online Store?**\nGet a fast, SEO-ready store built for online sales.")
 
-# Replace this URL with your actual Impact.com/Shopify affiliate link when ready
 shopify_url = "https://shopify.pxf.io/YOUR_AFFILIATE_ID" 
 
 st.sidebar.link_button("🚀 Start Shopify for $1/month", shopify_url)
@@ -53,7 +61,6 @@ if uploaded_files:
             for index, file in enumerate(uploaded_files):
                 img = Image.open(file)
                 
-                # Graceful API call with rate limit exception handling
                 try:
                     response = client.models.generate_content(
                         model="gemini-1.5-flash",
@@ -71,9 +78,8 @@ if uploaded_files:
                     "Generated Alt-Text": alt_text
                 })
                 
-                # Update progress bar
                 progress_bar.progress((index + 1) / len(uploaded_files))
-                time.sleep(1)  # Brief pause between calls to avoid hitting rate limits too quickly
+                time.sleep(1)
             
             st.success("Processing Complete!")
             st.session_state["results_df"] = pd.DataFrame(results)
