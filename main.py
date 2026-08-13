@@ -7,21 +7,8 @@ import time
 # Page configuration
 st.set_page_config(page_title="Bulk Alt-Text Generator", page_icon="🖼️", layout="wide")
 
-# --- IMPACT CONTENT VERIFICATION ---
-st.write("Impact-Site-Verification: fe779ce7-c525-4db0-87d4-bc40ff9351d6")
-# -----------------------------------
-
-st.title("🖼️ Bulk Alt-Text Generator for E-Commerce")
+st.title("🖼️ Bulk Alt-Text Generator")
 st.write("Upload product images and generate SEO-friendly alt text automatically.")
-
-# ----------------- SIDEBAR AFFILIATE PROMOTION -----------------
-st.sidebar.title("Recommended Tools")
-st.sidebar.info("💡 **Building an Online Store?**\nGet a fast, SEO-ready store built for online sales.")
-
-shopify_url = "https://shopify.pxf.io/YOUR_AFFILIATE_ID" 
-
-st.sidebar.link_button("🚀 Start Shopify for $1/month", shopify_url)
-# ---------------------------------------------------------------
 
 # Initialize Gemini Client using secrets
 try:
