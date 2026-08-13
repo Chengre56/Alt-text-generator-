@@ -15,19 +15,12 @@ st.set_page_config(
 st.title("🖼️ Bulk Alt-Text Generator")
 st.caption("Powered by Streamlit, Pandas, and Google Gemini AI")
 
-# 3. Sidebar Configuration for API Key
-st.sidebar.header("Configuration")
-api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
-
-if not api_key:
-    st.info("👈 Please enter your Gemini API Key in the sidebar to get started.", icon="🔑")
-    st.stop()
-
-# Initialize Gemini Client
+# 3. Initialize Gemini Client via Environment/Secrets
 try:
-    client = genai.Client(api_key=api_key)
+    # Client automatically picks up GEMINI_API_KEY from environment or st.secrets
+    client = genai.Client()
 except Exception as e:
-    st.error(f"Failed to initialize Gemini Client: {e}")
+    st.error(f"Failed to initialize Gemini Client: {e}. Ensure GEMINI_API_KEY is configured.")
     st.stop()
 
 # 4. Image Upload Section
@@ -47,10 +40,8 @@ if uploaded_files and st.button("🚀 Generate Alt-Text in Bulk", type="primary"
         status_text.text(f"Processing image {idx + 1}/{len(uploaded_files)}: {uploaded_file.name}...")
         
         try:
-            # Load image using PIL
             image = Image.open(uploaded_file)
             
-            # Call Gemini AI model
             prompt = "Provide a concise, accurate, and SEO-friendly alt-text description for this image. Output only the alt-text."
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
@@ -82,7 +73,6 @@ if uploaded_files and st.button("🚀 Generate Alt-Text in Bulk", type="primary"
         st.subheader("📊 Generated Alt-Text Results")
         st.dataframe(df, use_container_width=True)
         
-        # CSV Export
         csv_buffer = io.StringIO()
         df.to_csv(csv_buffer, index=False)
         
