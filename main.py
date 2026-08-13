@@ -3,7 +3,6 @@ import pandas as pd
 from PIL import Image
 from google import genai
 import time
-import os
 
 # Page configuration
 st.set_page_config(page_title="Bulk Alt-Text Generator", page_icon="🖼️", layout="wide")
@@ -16,7 +15,6 @@ st.title("🖼️ Bulk Alt-Text Generator for E-Commerce")
 st.write("Upload product images and generate SEO-friendly alt text automatically.")
 
 # ----------------- SIDEBAR AFFILIATE PROMOTION -----------------
-# We can keep some simple text-based promos in the sidebar, but the main page is clean
 st.sidebar.title("Recommended Tools")
 st.sidebar.info("💡 **Building an Online Store?**\nGet a fast, SEO-ready store built for online sales.")
 
@@ -31,7 +29,7 @@ except Exception as e:
     st.error("API Key missing or invalid. Please check your Streamlit secrets.")
 
 # ===============================================================
-# PART 1: CORE APPLICATION LOGIC (The stuff users came to do)
+# PART 1: CORE APPLICATION LOGIC
 # ===============================================================
 
 # 1. Multi-file uploader (Capped at 10 images)
@@ -51,11 +49,9 @@ if uploaded_files:
         if st.button("Generate Alt-Text for All", type="primary"):
             results = []
             progress_bar = st.progress(0)
-            status_text = st.empty()
             
             for index, file in enumerate(uploaded_files):
                 img = Image.open(file)
-                status_text.text(f"Processing image {index + 1}/{len(uploaded_files)}: {file.name}...")
                 
                 try:
                     response = client.models.generate_content(
@@ -75,11 +71,9 @@ if uploaded_files:
                 })
                 
                 progress_bar.progress((index + 1) / len(uploaded_files))
-                # Slight delay to avoid hammering the free tier API
-                time.sleep(0.5)
+                time.sleep(1)
             
             st.success("Processing Complete!")
-            # Save results to session state so they persist across interactions
             st.session_state["results_df"] = pd.DataFrame(results)
 
 # 3. Display and Download CSV
@@ -96,51 +90,42 @@ if "results_df" in st.session_state:
         mime="text/csv"
     )
 
-st.divider() # Simple separator between the app and the footer ad
+st.divider()
 
 # ===============================================================
-# PART 2: MAIN PAGE BOTTOM ADVERTISEMENT (The high-conversion card)
+# PART 2: MATCHED BEAUTY & STYLE ADVERTISEMENT
 # ===============================================================
 
 promo_url = "https://vel.academy/course-square-d24#aff=bhattavishesh69f3c8"
+# Direct public web image link so Streamlit loads it everywhere without local file errors
+nail_image_url = "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=800&auto=format&fit=crop"
 
-# Styled high-converting card using custom CSS for attractive formatting
-# We use the native `st.container` with `border=True` for a clean look
 with st.container(border=True):
-    col_img, col_text = st.columns([1, 2]) # 1/3 image, 2/3 text
+    col_img, col_text = st.columns([1, 2])
     
     with col_img:
-        # Load and display the exact image you provided (saved as nails_image.png in media folder)
-        image_path = os.path.join("media", "nails_image.png")
-        if os.path.exists(image_path):
-            st.image(image_path, use_container_width=True)
-        else:
-            st.warning("⚠️ Image file not found at media/nails_image.png.")
+        st.image(nail_image_url, use_container_width=True, caption="Matte Black Luxury Press-On Nails")
     
     with col_text:
-        # We use styled HTML here within st.markdown for maximum attractiveness.
         st.markdown(
             f"""
-            <div style="background-color: #f0fdf4; border-radius: 10px; padding: 15px; border: 1px solid #c3e6cb; margin-bottom: 20px;">
-                <span style="background-color: #166534; color: white; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px;">🔥 Unlock Your Best Self</span>
-                <h3 style="color: #111827; margin-top: 10px;">Master Real-World Productivity & Mindset Growth</h3>
-                <p style="color: #4b5563; font-size: 1rem; margin-bottom: 15px; line-height: 1.5;">
-                    Level up your professional and personal life. Access expert-led masterclasses 
-                    designed specifically for ambitious creators, students, and modern learners. 
-                    From mindset shifts to technical mastery—get lifetime access now.
+            <div style="background-color: #0f172a; color: #ffffff; border-radius: 12px; padding: 20px; border: 1px solid #334155;">
+                <span style="background-color: #ec4899; color: white; padding: 4px 12px; border-radius: 50px; text-transform: uppercase; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px;">💅 Beauty & E-Commerce Spotlight</span>
+                <h3 style="color: #f472b6; margin-top: 12px; font-size: 1.4rem;">Upgrade Your Beauty Store & Personal Brand</h3>
+                <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">
+                    Selling press-on nails, beauty products, or lifestyle accessories? Master high-converting social media marketing, aesthetic photo branding, and client retention strategies to scale your sales automatically.
                 </p>
                 <div style="margin-bottom: 20px;">
-                    <span style="background-color: #d1fae5; color: #065f46; padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; margin-right: 10px;">✨ Self-Paced Learning</span>
-                    <span style="background-color: #d1fae5; color: #065f46; padding: 5px 12px; border-radius: 50px; font-size: 0.8rem;">🚀 High-Impact Modules</span>
+                    <span style="background-color: #831843; color: #fbcfe8; padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; margin-right: 8px;">✨ Premium Aesthetic Guides</span>
+                    <span style="background-color: #831843; color: #fbcfe8; padding: 5px 12px; border-radius: 50px; font-size: 0.8rem;">🚀 Brand Scaling Strategies</span>
                 </div>
-                <a href="{promo_url}" target="_blank" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);">
-                    👉 Claim Your Seat & Get Started
+                <a href="{promo_url}" target="_blank" style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); color: white; padding: 12px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">
+                    👉 Check Out Special Beauty & Creator Offers
                 </a>
-                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 20px;">
-                    ⚠️ *Disclosure: We may earn a commission if you purchase through this link.*
+                <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 15px;">
+                    *Disclosure: We may earn an affiliate commission if you make a purchase through this link.*
                 </p>
             </div>
             """,
             unsafe_allow_html=True
         )
-# ===============================================================
