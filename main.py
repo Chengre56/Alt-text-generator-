@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 from PIL import Image
 from google import genai
@@ -8,20 +7,9 @@ import time
 # Page configuration
 st.set_page_config(page_title="Bulk Alt-Text Generator", page_icon="🖼️", layout="wide")
 
-# --- IMPACT META TAG VERIFICATION ---
-# Injects the tag into the main document head via JS
-components.html("""
-    <script>
-        var meta = document.createElement('meta');
-        meta.name = 'impact-site-verification';
-        meta.value = '26ad408d-64d8-4835-8cb8-1c89c7a72f70';
-        window.parent.document.getElementsByTagName('head')[0].appendChild(meta);
-    </script>
-""", height=0)
-
-# Raw meta tag rendering for direct HTML outputs
-st.html("<meta name='impact-site-verification' value='26ad408d-64d8-4835-8cb8-1c89c7a72f70'>")
-# ------------------------------------
+# --- IMPACT CONTENT VERIFICATION ---
+st.write("Impact-Site-Verification: fe779ce7-c525-4db0-87d4-bc40ff9351d6")
+# -----------------------------------
 
 st.title("🖼️ Bulk Alt-Text Generator for E-Commerce")
 st.write("Upload product images and generate SEO-friendly alt text automatically.")
