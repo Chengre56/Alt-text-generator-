@@ -1,88 +1,94 @@
-import streamlit as st
+import io
 import pandas as pd
 from PIL import Image
+import streamlit as st
 from google import genai
-import time
 
-# Page configuration
-st.set_page_config(page_title="Bulk Alt-Text Generator", page_icon="🖼️", layout="wide")
+# 1. Page Configuration
+st.set_page_config(
+    page_title="Bulk Alt-Text Generator",
+    page_icon="🖼️",
+    layout="wide"
+)
 
-# --- IMPACT CONTENT VERIFICATION ---
-st.write("Impact-Site-Verification: fe779ce7-c525-4db0-87d4-bc40ff9351d6")
-# -----------------------------------
+# 2. Page Title & Description
+st.title("🖼️ Bulk Alt-Text Generator")
+st.caption("Powered by Streamlit, Pandas, and Google Gemini AI")
 
-st.title("🖼️ Bulk Alt-Text Generator for E-Commerce")
-st.write("Upload product images and generate SEO-friendly alt text automatically.")
+# 3. Sidebar Configuration for API Key
+st.sidebar.header("Configuration")
+api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
 
-# ----------------- SIDEBAR AFFILIATE PROMOTION -----------------
-st.sidebar.title("Recommended Tools")
-st.sidebar.info("💡 **Building an Online Store?**\nGet a fast, SEO-ready store built for online sales.")
+if not api_key:
+    st.info("👈 Please enter your Gemini API Key in the sidebar to get started.", icon="🔑")
+    st.stop()
 
-shopify_url = "https://shopify.pxf.io/YOUR_AFFILIATE_ID" 
-
-st.sidebar.link_button("🚀 Start Shopify for $1/month", shopify_url)
-# ---------------------------------------------------------------
-
-# Initialize Gemini Client using secrets
+# Initialize Gemini Client
 try:
-    client = genai.Client(api_key=st.secrets["gemini_api_key"])
+    client = genai.Client(api_key=api_key)
 except Exception as e:
-    st.error("API Key missing or invalid. Please check your Streamlit secrets.")
+    st.error(f"Failed to initialize Gemini Client: {e}")
+    st.stop()
 
-# 1. Multi-file uploader (Capped at 10 images)
+# 4. Image Upload Section
 uploaded_files = st.file_uploader(
-    "Upload product images (up to 10 at once)", 
-    type=["jpg", "jpeg", "png"], 
+    "Upload images (JPG, PNG, WEBP)",
+    type=["png", "jpg", "jpeg", "webp"],
     accept_multiple_files=True
 )
 
-# 2. Process images
-if uploaded_files:
-    if len(uploaded_files) > 10:
-        st.error("Free limit reached! Please upload up to 10 images per batch.")
-    else:
-        st.write(f"**Total images uploaded:** {len(uploaded_files)}")
+# 5. Processing & Generation Logic
+if uploaded_files and st.button("🚀 Generate Alt-Text in Bulk", type="primary"):
+    results = []
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    for idx, uploaded_file in enumerate(uploaded_files):
+        status_text.text(f"Processing image {idx + 1}/{len(uploaded_files)}: {uploaded_file.name}...")
         
-        if st.button("Generate Alt-Text for All"):
-            results = []
-            progress_bar = st.progress(0)
+        try:
+            # Load image using PIL
+            image = Image.open(uploaded_file)
             
-            for index, file in enumerate(uploaded_files):
-                img = Image.open(file)
-                
-                try:
-                    response = client.models.generate_content(
-                        model="gemini-1.5-flash",
-                        contents=[img, "Write a concise, SEO-friendly alt text for this product image."]
-                    )
-                    alt_text = response.text.strip()
-                except Exception as err:
-                    if "429" in str(err) or "EXHAUSTED" in str(err):
-                        alt_text = "Error: Daily API quota reached. Please try again later."
-                    else:
-                        alt_text = f"Error generating text: {str(err)}"
-
-                results.append({
-                    "File Name": file.name,
-                    "Generated Alt-Text": alt_text
-                })
-                
-                progress_bar.progress((index + 1) / len(uploaded_files))
-                time.sleep(1)
+            # Call Gemini AI model
+            prompt = "Provide a concise, accurate, and SEO-friendly alt-text description for this image. Output only the alt-text."
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[image, prompt]
+            )
             
-            st.success("Processing Complete!")
-            st.session_state["results_df"] = pd.DataFrame(results)
+            alt_text = response.text.strip()
+            
+            results.append({
+                "Filename": uploaded_file.name,
+                "Alt Text": alt_text,
+                "Status": "Success"
+            })
+        except Exception as e:
+            results.append({
+                "Filename": uploaded_file.name,
+                "Alt Text": f"Error: {str(e)}",
+                "Status": "Failed"
+            })
+            
+        progress_bar.progress((idx + 1) / len(uploaded_files))
 
-# 3. Display and Download CSV
-if "results_df" in st.session_state:
-    df = st.session_state["results_df"]
-    st.subheader("Results")
-    st.dataframe(df, use_container_width=True)
+    status_text.text("Processing complete!")
     
-    csv_data = df.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        label="📥 Download CSV",
-        data=csv_data,
-        file_name="alt_texts.csv",
-        mime="text/csv"
-    )
+    # 6. Pandas Data Display & Export
+    if results:
+        df = pd.DataFrame(results)
+        
+        st.subheader("📊 Generated Alt-Text Results")
+        st.dataframe(df, use_container_width=True)
+        
+        # CSV Export
+        csv_buffer = io.StringIO()
+        df.to_csv(csv_buffer, index=False)
+        
+        st.download_button(
+            label="📥 Download Results as CSV",
+            data=csv_buffer.getvalue(),
+            file_name="bulk_alt_text_results.csv",
+            mime="text/csv"
+        )
