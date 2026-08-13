@@ -5,7 +5,7 @@ import streamlit as st
 
 def generate_alt_text(image_path: str) -> str:
     # 1. Initialize the Google Gemini Client using secrets
-    client = genai.Client(api_key=st.secrets["Gemini_API_KEY"])
+    client = genai.Client(api_key=st.secrets["gemini_api_key"])
     
     # 2. Open the image using Pillow and save to bytes
     image = Image.open(image_path)
