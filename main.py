@@ -8,7 +8,8 @@ import time
 # Page configuration
 st.set_page_config(page_title="Bulk Alt-Text Generator", page_icon="🖼️", layout="wide")
 
-# --- IMPACT META TAG VERIFICATION (INJECTED) ---
+# --- IMPACT META TAG VERIFICATION ---
+# Injects the tag into the main document head via JS
 components.html("""
     <script>
         var meta = document.createElement('meta');
@@ -18,9 +19,9 @@ components.html("""
     </script>
 """, height=0)
 
-# Visible Text Verification (as backup for crawlers reading rendered text)
-st.caption("Impact-Site-Verification: 26ad408d-64d8-4835-8cb8-1c89c7a72f70")
-# -----------------------------------------------
+# Raw meta tag rendering for direct HTML outputs
+st.html("<meta name='impact-site-verification' value='26ad408d-64d8-4835-8cb8-1c89c7a72f70'>")
+# ------------------------------------
 
 st.title("🖼️ Bulk Alt-Text Generator for E-Commerce")
 st.write("Upload product images and generate SEO-friendly alt text automatically.")
