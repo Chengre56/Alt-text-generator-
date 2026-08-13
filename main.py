@@ -29,7 +29,7 @@ if uploaded_files:
             
             # Request alt-text generation
             response = client.models.generate_content(
-                model="gemini-3.5-flash-lite",
+                model="gemini-3.6-flash",
                 contents=[img, "Write a concise, SEO-friendly alt text for this product image."]
             )
             
